@@ -15,6 +15,8 @@ import static org.easymock.EasyMock.replay;
 import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(EasyMockExtension.class)
 class AnnotationBasedAccountOpeningServiceTest {
+    public static final String ACCOUNT_ID = "VALID ID";
+    public static final BackgroundCheckResults ACCEPTABE_BACKGROUD_CHECK_RESULTS = new BackgroundCheckResults("Accepted risk", 500000);
     @TestSubject
     private AccountOpeningService underTest = new AccountOpeningService();
     @Mock
@@ -38,5 +40,36 @@ class AnnotationBasedAccountOpeningServiceTest {
                 TAX_ID,
                 DOB);
         assertEquals(AccountOpeningStatus.DECLINED, accountOpeningStatus);
+    }
+
+    @Test
+    public void shouldOpenAccount() throws IOException {
+        expect(backgroundCheckService.confirm(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB)).andReturn(ACCEPTABE_BACKGROUD_CHECK_RESULTS);
+        expect(referenceIdsManager.obtainId(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB
+        )).andReturn(ACCOUNT_ID);
+        expect(accountRepository.save(
+                ACCOUNT_ID,
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB,
+                ACCEPTABE_BACKGROUD_CHECK_RESULTS
+        )).andReturn(true);
+        replay(backgroundCheckService, referenceIdsManager, accountRepository);
+        final AccountOpeningStatus accountOpeningStatus = underTest.openAccount(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB
+        );
+        assertEquals(AccountOpeningStatus.OPENED, accountOpeningStatus);
     }
 }
