@@ -1,6 +1,7 @@
 package com.pluralsight.pensionready.setup;
 
 import com.pluralsight.pensionready.AccountRepository;
+import com.pluralsight.pensionready.report.GovernmentDataPublisher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,13 +23,15 @@ class AccountOpeningServiceTest {
     private BackgroundCheckService niceBackgroundCheckService = niceMock(BackgroundCheckService.class);
     private ReferenceIdsManager referenceIdsManager = mock(ReferenceIdsManager.class);
     private AccountRepository accountRepository = mock(AccountRepository.class);
+    private GovernmentDataPublisher governmentDataPublisher = mock(GovernmentDataPublisher.class);
 
     @Test
     public void shouldDeclineAccountOpening() throws IOException {
         underTest = new AccountOpeningService(
                 backgroundCheckService,
                 referenceIdsManager,
-                accountRepository);
+                accountRepository,
+                governmentDataPublisher);
         expect(backgroundCheckService.confirm("Mohamed",
                 "Magdy",
                 "1",
@@ -48,9 +51,14 @@ class AccountOpeningServiceTest {
         underTest = new AccountOpeningService(
                 niceBackgroundCheckService,
                 referenceIdsManager,
-                accountRepository);
-
-        replay(backgroundCheckService, referenceIdsManager, accountRepository);
+                accountRepository,
+                governmentDataPublisher);
+        expect(backgroundCheckService.confirm(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB)).andReturn(null);
+        replay(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
         final AccountOpeningStatus accountOpeningStatus = underTest.openAccount(
                 FIRST_NAME,
                 LAST_NAME,

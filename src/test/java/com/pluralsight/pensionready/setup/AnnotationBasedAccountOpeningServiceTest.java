@@ -1,6 +1,7 @@
 package com.pluralsight.pensionready.setup;
 
 import com.pluralsight.pensionready.AccountRepository;
+import com.pluralsight.pensionready.report.GovernmentDataPublisher;
 import org.easymock.EasyMockExtension;
 import org.easymock.Mock;
 import org.easymock.TestSubject;
@@ -25,6 +26,8 @@ class AnnotationBasedAccountOpeningServiceTest {
     private ReferenceIdsManager referenceIdsManager;
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private GovernmentDataPublisher governmentDataPublisher;
 
     @Test
     public void shouldDeclineAccountOpeningIfBackgroundCheckResultsRiskProfileUnacceptable() throws IOException {
@@ -63,7 +66,8 @@ class AnnotationBasedAccountOpeningServiceTest {
                 DOB,
                 ACCEPTABE_BACKGROUD_CHECK_RESULTS
         )).andReturn(true);
-        replay(backgroundCheckService, referenceIdsManager, accountRepository);
+        expect(governmentDataPublisher.publishAccountOpeningEvent(ACCOUNT_ID)).andReturn(true);
+        replay(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
         final AccountOpeningStatus accountOpeningStatus = underTest.openAccount(
                 FIRST_NAME,
                 LAST_NAME,
