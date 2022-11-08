@@ -26,18 +26,18 @@ class AccountOpeningServiceTest {
     private GovernmentDataPublisher governmentDataPublisher = mock(GovernmentDataPublisher.class);
 
     @Test
-    public void shouldDeclineAccountOpening() throws IOException {
+    public void shouldDeclineAccountOpeningWhenBackgroundCheckingAreNull() throws IOException {
         underTest = new AccountOpeningService(
                 backgroundCheckService,
                 referenceIdsManager,
                 accountRepository,
                 governmentDataPublisher);
-        expect(backgroundCheckService.confirm("Mohamed",
-                "Magdy",
-                "1",
-                LocalDate.of(2000, 8, 14)))
+        expect(backgroundCheckService.confirm(FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB))
                 .andReturn(null);
-        replay(backgroundCheckService, referenceIdsManager, accountRepository);
+        replay(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
         final AccountOpeningStatus accountOpeningStatus = underTest.openAccount(
                 FIRST_NAME,
                 LAST_NAME,
@@ -47,7 +47,7 @@ class AccountOpeningServiceTest {
     }
 
     @Test
-    public void shouldDeclineAccountOpening2() throws IOException {
+    public void shouldDeclineAccountOpeningWhenBackgroundCheckingAreNull2() throws IOException {
         underTest = new AccountOpeningService(
                 niceBackgroundCheckService,
                 referenceIdsManager,

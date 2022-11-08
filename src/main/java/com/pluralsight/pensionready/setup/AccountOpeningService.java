@@ -28,7 +28,7 @@ public class AccountOpeningService {
     }
 
 
-    public AccountOpeningStatus openAccount(String firstName, String lastName, String taxId, LocalDate dob)
+    public AccountOpeningStatus openAccount(String firstName,  String lastName, String taxId, LocalDate dob)
             throws IOException {
 
         final BackgroundCheckResults backgroundCheckResults = backgroundCheckService.confirm(firstName,
@@ -39,7 +39,7 @@ public class AccountOpeningService {
         if (backgroundCheckResults == null || backgroundCheckResults.getRiskProfile().equals(UNACCEPTABLE_RISK_PROFILE)) {
             return AccountOpeningStatus.DECLINED;
         } else {
-            final String id = referenceIdsManager.obtainId(firstName, lastName, taxId, dob);
+            final String id = referenceIdsManager.obtainId(firstName, lastName, "",taxId, dob);
             if (id != null) {
                 accountRepository.save(id, firstName, lastName, taxId, dob, backgroundCheckResults);
                 governmentDataPublisher.publishAccountOpeningEvent(id);
