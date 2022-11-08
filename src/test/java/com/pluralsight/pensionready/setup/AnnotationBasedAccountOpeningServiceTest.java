@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnnotationBasedAccountOpeningServiceTest {
     public static final String ACCOUNT_ID = "VALID ID";
     public static final BackgroundCheckResults ACCEPTABE_BACKGROUD_CHECK_RESULTS = new BackgroundCheckResults("Accepted risk", 500000);
+    public static final String exceptionMessage = "RUN TIME EXCEPTION";
     @TestSubject
     private AccountOpeningService underTest = new AccountOpeningService();
     @Mock
@@ -77,5 +78,31 @@ class AnnotationBasedAccountOpeningServiceTest {
                 DOB
         );
         assertEquals(AccountOpeningStatus.OPENED, accountOpeningStatus);
+    }
+
+    @Test
+    public void shouldThroughIfReferenceIdsManagerThrows() throws IOException {
+        expect(backgroundCheckService.confirm(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB
+        )).andReturn(ACCEPTABE_BACKGROUD_CHECK_RESULTS);
+
+        expect(referenceIdsManager.obtainId(
+                eq(FIRST_NAME),
+                eq(LAST_NAME),
+                anyString(),
+                eq(TAX_ID),
+                eq(DOB)
+        )).andThrow(new RuntimeException(exceptionMessage));
+        replay(backgroundCheckService, referenceIdsManager);
+        final RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.openAccount(
+                FIRST_NAME,
+                LAST_NAME,
+                TAX_ID,
+                DOB
+        ));
+        assertEquals(exceptionMessage, thrown.getMessage());
     }
 }
