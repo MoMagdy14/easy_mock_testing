@@ -44,6 +44,7 @@ class AccountOpeningServiceTest {
                 TAX_ID,
                 DOB);
         assertEquals(AccountOpeningStatus.DECLINED, accountOpeningStatus);
+        verify(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
     }
 
     @Test
@@ -65,5 +66,6 @@ class AccountOpeningServiceTest {
                 TAX_ID,
                 DOB);
         assertEquals(AccountOpeningStatus.DECLINED, accountOpeningStatus);
+        verify(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
     }
 }

@@ -45,6 +45,7 @@ class AnnotationBasedAccountOpeningServiceTest {
                 TAX_ID,
                 DOB);
         assertEquals(AccountOpeningStatus.DECLINED, accountOpeningStatus);
+        verify(backgroundCheckService, referenceIdsManager, accountRepository);
     }
 
     @Test
@@ -80,6 +81,7 @@ class AnnotationBasedAccountOpeningServiceTest {
                 DOB
         );
         assertEquals(AccountOpeningStatus.OPENED, accountOpeningStatus);
+        verify(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
     }
 
     @Test
@@ -97,7 +99,7 @@ class AnnotationBasedAccountOpeningServiceTest {
                 anyString(),
                 eq(TAX_ID),
                 eq(DOB)
-        )).andThrow(new RuntimeException(governmentExceptionMessage));
+        )).andThrow(new RuntimeException(exceptionMessage));
         replay(backgroundCheckService, referenceIdsManager);
         final RuntimeException thrown = assertThrows(RuntimeException.class, () -> underTest.openAccount(
                 FIRST_NAME,
@@ -132,7 +134,7 @@ class AnnotationBasedAccountOpeningServiceTest {
                 same(ACCEPTABE_BACKGROUD_CHECK_RESULTS)
         )).andReturn(true);
         governmentDataPublisher.publishAccountOpeningEvent(ACCOUNT_ID);
-        expectLastCall().andThrow(new RuntimeException(exceptionMessage));
+        expectLastCall().andThrow(new RuntimeException(governmentExceptionMessage));
         replay(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
 
         final RuntimeException actualThrown = assertThrows(RuntimeException.class, () -> underTest.openAccount(
@@ -142,6 +144,7 @@ class AnnotationBasedAccountOpeningServiceTest {
                 DOB
         ));
 
-        assertEquals(exceptionMessage, actualThrown.getMessage());
+        assertEquals(governmentExceptionMessage, actualThrown.getMessage());
+        verify(backgroundCheckService, referenceIdsManager, accountRepository, governmentDataPublisher);
     }
 }
